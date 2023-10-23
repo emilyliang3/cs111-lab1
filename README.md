@@ -2,16 +2,26 @@
 
 ## Pipe Up
 
-One sentence description
+This program runs all subsequent arguments as programs and as if there were a pipe in between adjacent ones.
 
 ## Building
 
-Explain briefly how to build your program
+If running on a Linux machine:
+make
+
+Otherwise:
+gcc -o pipe pipe.c
 
 ## Running
 
-Show an example run of your program, using at least two additional arguments, and what to expect
+Example:
+./pipe ls cat wc
+      7       7      63
+
+This command outputs the equivalent of:
+ls | cat | wc
 
 ## Cleaning up
 
-Explain briefly how to clean up all binary files
+Run the following command:
+make clean

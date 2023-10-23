@@ -7,14 +7,14 @@
 
 int main(int argc, char *argv[])
 {
-	if (argc == 0) {
+	if (argc <= 1) {
 		exit(EINVAL);
 	}
 	int fd[2];
 	for (int i = 1; i < argc; i++) {
 		const char *program = argv[i];
 		if (pipe(fd) == -1)
-			perror("pipe");
+			exit(errno);
 		pid_t pid = fork();
 		if (pid < 0) {
 			exit(errno);
@@ -22,7 +22,8 @@ int main(int argc, char *argv[])
 		if (pid == 0) {
 			// if more programs after this one:
 			if (i < argc - 1) {
-				close(fd[0]);
+				if (close(fd[0]) == -1)
+					exit(errno);
 				if (dup2(fd[1], STDOUT_FILENO) == -1)
 					exit(errno);
 			}
@@ -33,8 +34,13 @@ int main(int argc, char *argv[])
 		if (waitpid(pid, &st, 0) < 0) {
 			exit(errno);
 		}
+		if (!WIFEXITED(st))
+			exit(errno);
+		if (WEXITSTATUS(st) != 0)
+			exit(WEXITSTATUS(st));
 		// not first program
-		close(fd[1]);
+		if (close(fd[1]) == -1)
+			exit(errno);
 		if (dup2(fd[0], STDIN_FILENO) == -1)
 			exit(errno);
 	}
